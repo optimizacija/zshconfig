@@ -1,4 +1,6 @@
 alias h='history'
+# this is history witouth a timestamp
+alias hh='history | awk '\''{$1="";} {print $0} '\'' | sed -E "s/^ *//"'
 alias q=exit
 alias vim=nvim
 alias v=nvim
