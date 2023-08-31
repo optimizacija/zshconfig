@@ -28,5 +28,5 @@ function count_manual_changes {
     # $1: master
     # $2: head
     # master..head
-    git diff --stat "$1".."$2"  ':!*.json' ':!*.pb.go' ':!*.copyist' | sed -nE 's/.*\| *([0-9]+).*/\1/p' | awk '{s+=$1} END {print s}' 
+    git diff --stat "$1".."$2" ':!*.json' ':!*.pb.go' ':!*.bazel' ':!*.copyist' | sed -nE 's/.*\| *([0-9]+).*/\1/p' | awk '{s+=$1} END {print s}'
 }
