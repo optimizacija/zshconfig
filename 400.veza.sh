@@ -5,15 +5,23 @@ alias bazel_run_record='bazel run --config=record'
 alias bazel_run_record_skip_extraction='bazel run --config=record --define=skip_test_extraction=true'
 alias bazel_lint_fix='bazel run //tools:lint go -- --fix'
 alias bazel_gen_proto='bazel run //tools:genproto'
+alias bazel_gen_wildcard_edges='bazel run //controlp/internal/graph/cmd/genwildcardedges -- -output `realpath internal/graph_schema/wildcard_edges.go`'
+
+function cd_veza {
+    cd /Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core
+}
 
 function clean_docker() {
-    cd /Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core
+    cd_veza
+    
     bazel run //tools/cmd/dockerclean
     scripts/devenv/start_docker_registry.sh
     bazel run //tools/cmd/kubecreate -- up -t --debug
 }
 
 function genreachability_fingerprint {
+    cd_veza
+    
     bazel run //controlp/internal/graph/cmd/genreachability -- \
         -output-reachability-fingerprint `realpath controlp/internal/graph/precomputed_reachability_fingerprint.txt` \
         -output-reachability `realpath controlp/internal/graph/precomputed_reachability_map.go` \
@@ -21,7 +29,7 @@ function genreachability_fingerprint {
 }
 
 function upgrade_tenant {
-   bazel run //tools/cmd/kubecreate -- tenant upgrade -n tenant1 
+    bazel run //tools/cmd/kubecreate -- tenant upgrade -n tenant1 
 }
 
 function count_manual_changes {
