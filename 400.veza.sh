@@ -40,5 +40,13 @@ function kpf_neo4j {
 }
 
 function stern_error_logs {
-    stern -n tenant1-cp '.*' | grep '"level":"error"'
+    stern -n tenant1-cp --color=always '.*' 2>&1 | grep '"level":"error"'
 }
+
+function stern_error_logs_jq {
+    # prettified
+   stern -n tenant1-cp '.*' --color=always 2>&1 |\
+       grep '"level":"error"' |\
+       awk '{ print $1 " " $2; $1=$2=""; sub(/^ */, ""); print $0 | "jq ."; close("jq ."); }' 
+}
+
