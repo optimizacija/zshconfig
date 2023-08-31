@@ -24,6 +24,10 @@ function bazel_upgrade_tenant {
     bazel run //tools/cmd/kubecreate -- tenant upgrade -n tenant1 
 }
 
+function bazel_gen_nodelist {
+    bazel run //internal/graph_schema/cmd/nodelist -- -graph-level=ALL -output `realpath frontend/scripts/NodeTypes.json`
+}
+
 function count_manual_changes {
     # $1: master
     # $2: head
