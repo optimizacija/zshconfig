@@ -32,5 +32,13 @@ function count_manual_changes {
     # $1: master
     # $2: head
     # master..head
-    git diff --stat "$1".."$2" ':!*.json' ':!*.pb.go' ':!*.bazel' ':!*.copyist' | sed -nE 's/.*\| *([0-9]+).*/\1/p' | awk '{s+=$1} END {print s}'
+    git diff --stat "$1".."$2" ':!*.json' ':!*.pb.go' ':!*.bazel' ':!*.copyist' ':!*tar.gz' | sed -nE 's/.*\| *([0-9]+).*/\1/p' | awk '{s+=$1} END {print s}'
+}
+
+function kpf_neo4j {
+   kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
+}
+
+function stern_error_logs {
+    stern -n tenant1-cp '.*' | grep '"level":"error"'
 }
