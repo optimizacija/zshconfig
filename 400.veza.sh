@@ -50,14 +50,16 @@ function kpf_neo4j {
    kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
 }
 
+function stern_logs {
+    stern -n tenant1-cp --color=always '.*' 2>&1
+}
+
+function stern_logs_fmt {
+   stern -n tenant1-cp '.*' --color=always 2>&1 |\
+       awk '{ print $1 " " $2; $1=$2=""; sub(/^ */, ""); print $0; }' | \
+       jq -R -r '. as $raw | try (fromjson | if has("ts") then .ts |= strftime("%Y-%m-%d %H:%M:%S.%3") else . end) catch $raw'
+}
+
 function stern_error_logs {
     stern -n tenant1-cp --color=always '.*' 2>&1 | grep '"level":"error"'
 }
-
-function stern_error_logs_jq {
-    # prettified
-   stern -n tenant1-cp '.*' --color=always 2>&1 |\
-       grep '"level":"error"' |\
-       awk '{ print $1 " " $2; $1=$2=""; sub(/^ */, ""); print $0 | "jq ."; close("jq ."); }' 
-}
-
