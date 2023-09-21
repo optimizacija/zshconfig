@@ -83,3 +83,8 @@ alias kgcj='kubectl get cronjob'
 alias kecj='kubectl edit cronjob'
 alias kdcj='kubectl describe cronjob'
 alias kdelcj='kubectl delete cronjob'
+
+# "kubectl describe all pod events"
+function kdape {
+    kubectl get pods -A | awk '{print  $1, $2}' | xargs -n 2 sh -c 'echo "\n\n$0 $1" && kubectl describe pod -n $0 $1 | sed -n '\''/Events:/,$p'\'''
+}
