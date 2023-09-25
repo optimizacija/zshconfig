@@ -15,7 +15,17 @@ alias bazgenproto='bazel run //tools:genproto'
 alias bazgenwcedges='bazel run //controlp/internal/graph/cmd/genwildcardedges -- -output `realpath internal/graph_schema/wildcard_edges.go`'
 
 # bazel clean docker
-function bazcleand() {
+function bazcleandocker() {
+    bazel run //tools/cmd/dockerclean
+    scripts/devenv/start_docker_registry.sh
+    bazel run //tools/cmd/kubecreate -- up -t --debug
+}
+
+function bazhardcleandocker() {
+    bazel run //tools/cmd/dockerclean
+    docker ps -a | awk 'NR > 1 {print $1}' | xargs -I {} docker kill {} 2&>/dev/null 
+    docker system prune -f 
+    docker volume prune -f
     bazel run //tools/cmd/dockerclean
     scripts/devenv/start_docker_registry.sh
     bazel run //tools/cmd/kubecreate -- up -t --debug
