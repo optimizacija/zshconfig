@@ -67,7 +67,7 @@ function stern_logs {
 function stern_logs_fmt {
    stern -n tenant1-cp '.*' --color=always 2>&1 |\
        awk '{ print $1 " " $2; $1=$2=""; sub(/^ */, ""); print $0; }' | \
-       jq -R -r '. as $raw | try (fromjson | if has("ts") then .ts |= strftime("%Y-%m-%d %H:%M:%S.%3") else . end) catch $raw'
+       jq -R -r '. as $raw | try (fromjson | if has("ts") then .ts |= strftime("%Y-%m-%d %H:%M:%S") else . end) catch $raw'
 }
 
 function stern_error_logs {
