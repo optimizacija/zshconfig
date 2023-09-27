@@ -67,7 +67,7 @@ def findMatchingValues:
         | [.[] | map(_flattenValues | _removeEmpties) | unique] | _arrayIntersect | map(tostring) as $values
         | $original 
         | .[]
-        | _findKeysWithValues($values)
+        | _findKeysWithValues($values) | to_entries | sort_by(.key) | from_entries
     ]
     ;
     
@@ -90,6 +90,6 @@ def findUniqueValues:
         | [.[] | map(_flattenValues | _removeEmpties) | unique] | _arrayOuterDifference | map(tostring) as $values
         | $original 
         | .[]
-        | _findKeysWithValues($values)
+        | _findKeysWithValues($values) | to_entries | sort_by(.key) | from_entries
     ]
     ;
