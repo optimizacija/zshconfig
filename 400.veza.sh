@@ -13,6 +13,8 @@ alias bazlintfix='bazel run //tools:lint go -- --fix'
 alias bazgenproto='bazel run //tools:genproto'
 # bazel gen wildcard edges
 alias bazgenwcedges='bazel run //controlp/internal/graph/cmd/genwildcardedges -- -output `realpath internal/graph_schema/wildcard_edges.go`'
+# bazel gen pipeline configuration (pipeline_configuration.generated.json)
+alias bazgenpipelinecfg='bazel run //agents/dev/cmd/cfggenerator'
 
 # bazel clean docker
 function bazcleandocker() {
