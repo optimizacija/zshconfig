@@ -75,3 +75,7 @@ function stern_logs_fmt {
 function stern_error_logs {
     stern -n tenant1-cp --color=always '.*' 2>&1 | grep '"level":"error"'
 }
+
+function bazgenpermap {
+   bazel run //agents/azure/permap/cmd/genpermap 
+}
