@@ -79,3 +79,8 @@ function stern_error_logs {
 function bazgenpermap {
    bazel run //agents/azure/permap/cmd/genpermap 
 }
+
+function bazoaaextract {
+    bazel run //agents/dev/cmd/agentrunner extract custom_provider_application
+}
+
