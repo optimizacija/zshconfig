@@ -84,3 +84,10 @@ function bazoaaextract {
     bazel run //agents/dev/cmd/agentrunner extract custom_provider_application
 }
 
+function oaacreatetemplate {
+    go run github.com/cookieai-inc/cookieai-core/agents/custom/dev/cmd/template_setup  -name="$1" -force -skip_lint=false
+}
+
+function oaacreateconnector {
+    bazel run //clients/oaa/cmd/connector_setup -- -name="$1" -force
+}
