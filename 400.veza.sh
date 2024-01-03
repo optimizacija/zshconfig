@@ -81,7 +81,8 @@ function bazgenpermap {
 }
 
 function bazoaaextract {
-    bazel run //agents/dev/cmd/agentrunner extract custom_provider_application
+    # custom_provider_application, custom_provider_principal
+    bazel run //agents/dev/cmd/agentrunner extract custom_provider_principal
 }
 
 function oaacreatetemplate {
