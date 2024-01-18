@@ -62,26 +62,30 @@ function kpf_neo4j {
    kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
 }
 
-function logs_all {
+function log_all {
     stern -n tenant1-cp --color=always '.*' 2>&1
 }
 
-function logs_all_fmt_deprecated {
+function log_all_fmt_deprecated {
    stern -n tenant1-cp '.*' --color=always 2>&1 |\
        awk '{ print $1 " " $2; $1=$2=""; sub(/^ */, ""); print $0; }' | \
        jq -R -r '. as $raw | try (fromjson | if has("ts") then .ts |= strftime("%Y-%m-%d %H:%M:%S") else . end) catch $raw'
 }
 
-function logs_err {
+function log_err {
     stern -n tenant1-cp --color=always '.*' 2>&1 | grep '"level":"error"'
 }
 
-function logs_parser {
+function log_parser {
     kubectl logs -f -ntenant1-cp -l app=cp-parser-historical
 }
 
-function logs_extractor {
+function log_extractor {
    kubectl logs -f -ntenant1-dp -l app=agent-manager 
+}
+
+function log_frontend {
+   kubectl logs -f -ntenant1-cp -l app=frontend 
 }
 
 function bazgenpermap {
