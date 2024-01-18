@@ -62,26 +62,37 @@ function kpf_neo4j {
    kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
 }
 
-function stern_logs {
+function logs_all {
     stern -n tenant1-cp --color=always '.*' 2>&1
 }
 
-function stern_logs_fmt {
+function logs_all_fmt_deprecated {
    stern -n tenant1-cp '.*' --color=always 2>&1 |\
        awk '{ print $1 " " $2; $1=$2=""; sub(/^ */, ""); print $0; }' | \
        jq -R -r '. as $raw | try (fromjson | if has("ts") then .ts |= strftime("%Y-%m-%d %H:%M:%S") else . end) catch $raw'
 }
 
-function stern_error_logs {
+function logs_err {
     stern -n tenant1-cp --color=always '.*' 2>&1 | grep '"level":"error"'
+}
+
+function logs_parser {
+    kubectl logs -f -ntenant1-cp -l app=cp-parser-historical
+}
+
+function logs_extractor {
+   kubectl logs -f -ntenant1-dp -l app=agent-manager 
 }
 
 function bazgenpermap {
    bazel run //agents/azure/permap/cmd/genpermap 
 }
 
-function bazoaaextract {
-    # custom_provider_application, custom_provider_principal
+function bazoaaextract_application {
+    bazel run //agents/dev/cmd/agentrunner extract custom_provider_application
+}
+
+function bazoaaextract_principal {
     bazel run //agents/dev/cmd/agentrunner extract custom_provider_principal
 }
 
