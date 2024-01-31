@@ -55,7 +55,9 @@ function count_manual_changes {
     # $1: master
     # $2: head
     # master..head
-    git diff --stat "$1".."$2" ':!*.json' ':!*.pb.go' ':!*.bazel' ':!*.copyist' ':!*tar.gz' ':!*.bzl' | sed -nE 's/.*\| *([0-9]+).*/\1/p' | awk '{s+=$1} END {print s}'
+    git diff --stat "$1".."$2" ':!*.json' ':!*.pb.go' ':!*.bazel' ':!*.copyist' ':!*tar.gz' ':!*.bzl' | \
+        sed -nE 's/.*\| *([0-9]+).*/\1/p' | \
+        awk '{s+=$1} END {print s}'
 }
 
 function kpf_neo4j {
@@ -86,6 +88,10 @@ function log_extractor {
 
 function log_frontend {
    kubectl logs -f -ntenant1-cp -l app=frontend 
+}
+
+function log_frontend {
+   kubectl logs -f -ntenant1-cp -l app=cp-api
 }
 
 function bazgenpermap {
