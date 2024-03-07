@@ -1,37 +1,74 @@
 #!/bin/zsh
 alias cdc='cd /Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core'
 export CDPATH='/Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core'
+
+
+# ALIASES
+
 # bazel run
 alias bazn='bazel run'
 # bazel record
 alias bazrec='bazel run --config=record'
 # bazel record and skip extraction
 alias bazrecskip='bazel run --config=record --define=skip_test_extraction=true'
-# bazel run lint go fix
-alias bazlintfix='bazel run //tools:lint go -- --fix'
-# bazel gen wildcard edges
-alias bazgenwcedges='bazel run //controlp/internal/graph/cmd/genwildcardedges -- -output `realpath internal/graph_schema/wildcard_edges.go`'
-# bazel gen pipeline configuration (pipeline_configuration.generated.json)
-alias bazgenpipelinecfg='bazel run //agents/dev/cmd/cfggenerator'
 
-# bazel gen proto files
+
+# bazel run lint go fix
+# LINTERS
+
+function bazlintdepguard {
+   bazel run //tools:lint bazeldepguard 
+}
+
+
+function bazlintfix {
+    bazel run //tools:lint go -- --fix
+}
+
+
+# GENERATE COMMANDS
+
+function bazgenwcedges {
+    # bazel gen wildcard edges
+    bazel run //controlp/internal/graph/cmd/genwildcardedges -- -output `realpath internal/graph_schema/wildcard_edges.go`
+}
+
+function bazgenpipelinecfg {
+    # bazel gen pipeline configuration (pipeline_configuration.generated.json)
+    bazel run //agents/dev/cmd/cfggenerator
+}
+
 function bazgenproto() {
+    # bazel gen proto files
    bazel run //tools:genproto 
    bazel run //tools:lint protobuf_breaking 
 }
 
-function bazlintdepguard() {
-   bazel run //tools:lint bazeldepguard 
+function bazgenfp {
+    # bazel gen (reachability) fingerprint
+    bazel run //controlp/internal/graph/cmd/genreachability -- \
+        -output-reachability-fingerprint `realpath controlp/internal/graph/precomputed_reachability_fingerprint.txt` \
+        -output-reachability `realpath controlp/internal/graph/precomputed_reachability_map.go` \
+        -output-graphplanner `realpath controlp/internal/graph/graphplanner`
 }
 
-# bazel clean docker
+function bazgennl {
+    # bazel gen node list
+    bazel run //internal/graph_schema/cmd/nodelist -- -graph-level=ALL -output `realpath frontend/scripts/NodeTypes.json`
+}
+
+
+# DOCKER & KUBERNETS (clean/upgrade)
+
 function bazcleandocker() {
+    # bazel clean docker
     bazel run //tools/cmd/dockerclean
     scripts/devenv/start_docker_registry.sh
     bazel run //tools/cmd/kubecreate -- up -t --debug
 }
 
 function bazhardcleandocker() {
+    # bazel hard clean docker
     bazel run //tools/cmd/dockerclean
     docker ps -a | awk 'NR > 1 {print $1}' | xargs -I {} docker kill {} 2&>/dev/null 
     docker system prune -f 
@@ -41,23 +78,13 @@ function bazhardcleandocker() {
     bazel run //tools/cmd/kubecreate -- up -t --debug
 }
 
-# bazel gen (reachability) fingerprint
-function bazgenfp {
-    bazel run //controlp/internal/graph/cmd/genreachability -- \
-        -output-reachability-fingerprint `realpath controlp/internal/graph/precomputed_reachability_fingerprint.txt` \
-        -output-reachability `realpath controlp/internal/graph/precomputed_reachability_map.go` \
-        -output-graphplanner `realpath controlp/internal/graph/graphplanner`
-}
-
-# bazel ugprade tenant
 function bazut {
+    # bazel ugprade tenant
     bazel run //tools/cmd/kubecreate -- tenant upgrade -n tenant1 
 }
 
-# bazel gen node list
-function bazgennl {
-    bazel run //internal/graph_schema/cmd/nodelist -- -graph-level=ALL -output `realpath frontend/scripts/NodeTypes.json`
-}
+
+# GIT
 
 function count_manual_changes {
     # $1: master
@@ -67,6 +94,9 @@ function count_manual_changes {
         sed -nE 's/.*\| *([0-9]+).*/\1/p' | \
         awk '{s+=$1} END {print s}'
 }
+
+
+# KUBERNETES (logging)
 
 function kpf_neo4j {
    kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
@@ -106,11 +136,14 @@ function bazgenpermap {
    bazel run //agents/azure/permap/cmd/genpermap 
 }
 
-function bazoaaextract_application {
+
+# OAA
+
+function oaaextract_application {
     bazel run //agents/dev/cmd/agentrunner extract custom_provider_application
 }
 
-function bazoaaextract_principal {
+function oaaextract_principal {
     bazel run //agents/dev/cmd/agentrunner extract custom_provider_principal
 }
 
@@ -120,4 +153,12 @@ function oaacreatetemplate {
 
 function oaacreateconnector {
     bazel run //clients/oaa/cmd/connector_setup -- -name="$1" -force
+}
+
+
+# Frontend
+
+function fronte2etest {
+   cd /Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core/frontend
+   npm run record:e2e-be-data; cd -
 }
