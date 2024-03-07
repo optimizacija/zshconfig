@@ -9,12 +9,20 @@ alias bazrec='bazel run --config=record'
 alias bazrecskip='bazel run --config=record --define=skip_test_extraction=true'
 # bazel run lint go fix
 alias bazlintfix='bazel run //tools:lint go -- --fix'
-# bazel gen proto files
-alias bazgenproto='bazel run //tools:genproto'
 # bazel gen wildcard edges
 alias bazgenwcedges='bazel run //controlp/internal/graph/cmd/genwildcardedges -- -output `realpath internal/graph_schema/wildcard_edges.go`'
 # bazel gen pipeline configuration (pipeline_configuration.generated.json)
 alias bazgenpipelinecfg='bazel run //agents/dev/cmd/cfggenerator'
+
+# bazel gen proto files
+function bazgenproto() {
+   bazel run //tools:genproto 
+   bazel run //tools:lint protobuf_breaking 
+}
+
+function bazlintdepguard() {
+   bazel run //tools:lint bazeldepguard 
+}
 
 # bazel clean docker
 function bazcleandocker() {
