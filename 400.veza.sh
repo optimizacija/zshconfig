@@ -13,6 +13,13 @@ alias bazrec='bazel run --config=record'
 alias bazrecskip='bazel run --config=record --define=skip_test_extraction=true'
 
 
+# MISC 
+
+function bazexpunge {
+    bazel clean --expunge
+}
+
+
 # bazel run lint go fix
 # LINTERS
 
@@ -161,4 +168,24 @@ function oaacreateconnector {
 function fronte2etest {
    cd /Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core/frontend
    npm run record:e2e-be-data; cd -
+}
+
+function frontk8senable {
+    bazel run //tools/cmd/kubecreate set deploy frontend enable
+    bazel run //tools/cmd/kubecreate set build frontend enable
+}
+
+function frontk8sdisable {
+    bazel run //tools/cmd/kubecreate set deploy frontend disable
+    bazel run //tools/cmd/kubecreate set build frontend disable
+}
+
+# Kubernetes - performance
+
+function kmem {
+   kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$3'"}'" | sort -nk2 
+}
+
+function kcpu {
+   kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$2'"}'" | sort -nk2 
 }
