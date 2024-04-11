@@ -189,3 +189,9 @@ function kmem {
 function kcpu {
    kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$2'"}'" | sort -nk2 
 }
+
+# DEVTOOLS
+function dtupdatedeps {
+    bazel run //:gazelle -- update-repos -from_file=go.mod
+    bazel run //:gazelle
+}
