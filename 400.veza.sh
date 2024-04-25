@@ -28,10 +28,13 @@ function bazlintdepguard {
 }
 
 
-function bazlintfix {
+function bazlintgo {
     bazel run //tools:lint go -- --fix
 }
 
+function bazlintbuildifier {
+   bazel run //:buildifier 
+}
 
 # GENERATE COMMANDS
 
