@@ -1,6 +1,7 @@
 #!/bin/zsh
-alias cdc='cd /Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core'
-export CDPATH='/Users/Shared/dev/src/github.com/cookieai-inc/cookieai-core'
+alias cdc='cd /Users/jmales/veza/cookieai-core'
+export CDPATH='/Users/jmales/veza/cookieai-core'
+export DOCKER_HOST="unix://$HOME/.colima/docker.sock"
 
 
 # ALIASES
@@ -10,8 +11,7 @@ alias bazn='bazel run'
 # bazel record
 alias bazrec='bazel run --config=record'
 # bazel record and skip extraction
-alias bazrecskip='bazel run --config=record --define=skip_test_extraction=true'
-
+alias bazrecskip='bazel run --config=record --define=skip-record-api=true'
 
 # MISC 
 
@@ -93,6 +93,12 @@ function bazut {
     bazel run //tools/cmd/kubecreate -- tenant upgrade -n tenant1 
 }
 
+function dockerwipe {
+    # this command is not perfect, it does not always work as expected. should be refactored
+    docker network rm $(docker network ls --filter type=custom -q)
+    docker stop $(docker ps -a -q) 
+}
+
 
 # GIT
 
@@ -106,11 +112,25 @@ function count_manual_changes {
 }
 
 
-# KUBERNETES (logging)
+# Kubernetes (performance)
+
+function kmem {
+   kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$3'"}'" | sort -nk2 
+}
+
+function kcpu {
+   kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$2'"}'" | sort -nk2 
+}
+
+
+# KUBERNETES (util)
 
 function kpf_neo4j {
    kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
 }
+
+
+# KUBERNETES (logging)
 
 function log_all {
     stern -n tenant1-cp --color=always '.*' 2>&1
@@ -183,18 +203,3 @@ function frontk8sdisable {
     bazel run //tools/cmd/kubecreate set build frontend disable
 }
 
-# Kubernetes - performance
-
-function kmem {
-   kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$3'"}'" | sort -nk2 
-}
-
-function kcpu {
-   kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$2'"}'" | sort -nk2 
-}
-
-# DEVTOOLS
-function dtupdatedeps {
-    bazel run //:gazelle -- update-repos -from_file=go.mod
-    bazel run //:gazelle
-}
