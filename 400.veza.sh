@@ -1,6 +1,6 @@
 #!/bin/zsh
-alias cdc='cd /Users/jmales/veza/cookieai-core'
-export CDPATH='/Users/jmales/veza/cookieai-core'
+alias cdc="cd $HOME/veza/cookieai-core"
+export CDPATH="$HOME/veza/cookieai-core"
 export DOCKER_HOST="unix://$HOME/.colima/docker.sock"
 
 
@@ -20,7 +20,6 @@ function bazexpunge {
 }
 
 
-# bazel run lint go fix
 # LINTERS
 
 function bazlintdepguard {
@@ -35,6 +34,7 @@ function bazlintgo {
 function bazlintbuildifier {
    bazel run //:buildifier 
 }
+
 
 # GENERATE COMMANDS
 
@@ -111,6 +111,20 @@ function count_manual_changes {
         awk '{s+=$1} END {print s}'
 }
 
+ 
+# Neo4j
+
+function kcleanneo4j {
+    kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "match(n:PG) detach delete n;"'
+}
+
+
+# KUBERNETES (util)
+
+function kpf_neo4j {
+   kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
+}
+
 
 # Kubernetes (performance)
 
@@ -122,19 +136,6 @@ function kcpu {
    kubectl get namespaces | awk 'NR > 1 { print $1 }' | xargs -I {} bash -c "kubectl -n {} top pod 2>/dev/null | awk 'NR>1{print "'$1" "$2'"}'" | sort -nk2 
 }
 
-
-# KUBERNETES (util)
-
-function kpf_neo4j {
-   kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
-}
-
- 
-# Neo4j
-
-function kcleanneo4j {
-    kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "match(n:PG) detach delete n;"'
-}
 
 # KUBERNETES (logging)
 
