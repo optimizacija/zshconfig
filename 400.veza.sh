@@ -129,6 +129,12 @@ function kpf_neo4j {
    kubectl port-forward -n tenant1-cp cp-neo4j-historical-0 7687:7687 7474:7474 
 }
 
+ 
+# Neo4j
+
+function kcleanneo4j {
+    kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "match(n:PG) detach delete n;"'
+}
 
 # KUBERNETES (logging)
 
