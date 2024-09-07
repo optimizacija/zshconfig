@@ -13,6 +13,47 @@ alias bazrec='bazel run --config=record'
 # bazel record and skip extraction
 alias bazrecskip='bazel run --config=record --define=skip-record-api=true'
 
+
+# PIPELINE (extract, parse)
+
+function _ensureDirExists {
+    if [ ! -d "$1" ]; then
+        mkdir -p "$1"
+    fi 
+}
+
+veza_extractions="/tmp/veza-agent-extractions"
+
+function bazxr {
+    # "bazel extract recording"
+    # - it extracts new data and saves the recording to a file
+    # - recordings are saved on per-agent basis
+    # - should be used before "bazpr" command
+    _ensureDirExists $veza_extractions
+    
+   bazel run agents/dev/cmd/agentrunner -- -output "$veza_extractions/$1.json" extract "$1" 
+}
+
+function bazpr {
+    # "bazel parse recording"
+    # - it parses preextracted recording that is stored in a file
+    # - recordings are saved on per-agent basis
+    # - should be used after "bazxr" command
+    
+    bazel run agents/dev/cmd/agentrunner -- -input "$veza_extractions/$1.json" parse "$1"
+}
+
+function bazx {
+    # "bazel extract" (without record)
+    bazel run agents/dev/cmd/agentrunner extract "$1"
+}
+
+function bazp {
+    # "bazel parse" (without record)
+    bazel run agents/dev/cmd/agentrunner parse "$1"
+}
+
+
 # MISC 
 
 function bazexpunge {
@@ -33,6 +74,10 @@ function bazlintgo {
 
 function bazlintbuildifier {
    bazel run //:buildifier 
+}
+
+function bazlintckdb {
+   bazel run //tools/linters:ckdb --fix
 }
 
 
@@ -94,9 +139,9 @@ function bazut {
 }
 
 function dockerwipe {
-    # this command is not perfect, it does not always work as expected. should be refactored
-    docker network rm $(docker network ls --filter type=custom -q)
-    docker stop $(docker ps -a -q) 
+    docker stop $(docker ps -aq)
+    docker rm $(docker ps -aq)
+    docker network prune -f
 }
 
 
@@ -209,4 +254,19 @@ function frontk8sdisable {
     bazel run //tools/cmd/kubecreate set deploy frontend disable
     bazel run //tools/cmd/kubecreate set build frontend disable
 }
+
+
+# AWS
+
+# get profile info example
+# AWS_PROFILE=veza-debug-01-developer-debug bazel run //tools/cmd/profile -- -b veza-cookie01-prod-debug-1 -d -s "2024-06-06T02:00:00" -duration "98094s" -p cpu -svc cp-parser -t edwards
+
+function awsloginsso {
+   export AWS_PROFILE=veza-debug-01-developer-debug
+    # Authenticate
+    aws sso login
+    # Validate that you have a valid sso session
+    aws sts get-caller-identity 
+}
+
 
