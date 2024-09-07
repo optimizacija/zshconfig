@@ -160,7 +160,12 @@ function count_manual_changes {
 # Neo4j
 
 function kcleanneo4j {
-    kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "match(n:PG) detach delete n;"'
+    left_to_delete=$(kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "match (n:PG) return count(*);"' | tr -d $'\r' | tail -n1 | sed 's/[^0-9]//g')
+
+    while [ "$left_to_delete" -ne 0 ]; do
+        echo "Deleting nodes: $left_to_delete"
+        left_to_delete=$(kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "MATCH (n:PG) WITH n LIMIT 10000 DETACH DELETE n WITH count(*) AS deleted MATCH (n:PG) RETURN count(n);"' | tr -d $'\r' | tail -n1 | sed 's/[^0-9]//g')
+    done
 }
 
 
