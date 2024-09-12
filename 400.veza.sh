@@ -158,13 +158,28 @@ function count_manual_changes {
 
  
 # Neo4j
+        
+function _format_date {
+    printf '%02dh:%02dm:%02ds' $(($1 / 3600)) $(( ($1 % 3600) / 60 )) $(($1 % 60))
+}
 
 function kcleanneo4j {
-    left_to_delete=$(kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "match (n:PG) return count(*);"' | tr -d $'\r' | tail -n1 | sed 's/[^0-9]//g')
+    remaining=$(kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "match (n:PG) return count(*);"' | tr -d $'\r' | tail -n1 | sed 's/[^0-9]//g')
+    total_count=$remaining
 
-    while [ "$left_to_delete" -ne 0 ]; do
-        echo "Deleting nodes: $left_to_delete"
-        left_to_delete=$(kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "MATCH (n:PG) WITH n LIMIT 10000 DETACH DELETE n WITH count(*) AS deleted MATCH (n:PG) RETURN count(n);"' | tr -d $'\r' | tail -n1 | sed 's/[^0-9]//g')
+    beginning=$(date +%s)
+    while [ "$remaining" -ne 0 ]; do
+        remaining=$(kubectl exec -it -n tenant1-cp -c neo4j cp-neo4j-historical-0 -- bash -c 'cypher-shell -u neo4j -p test --format plain "MATCH (n:PG) WITH n LIMIT 10000 DETACH DELETE n WITH count(*) AS deleted MATCH (n:PG) RETURN count(n);"' | tr -d $'\r' | tail -n1 | sed 's/[^0-9]//g')
+        now=$(date +%s)
+        elapsed=$(($now - $beginning))
+        deleted=$(($total_count - $remaining))
+        expected=$(($remaining * $elapsed/$deleted))
+        
+        elapsedFormatted=$(_format_date elapsed)
+        expectedFormatted=$(_format_date expected)
+
+        echo "Elapsed: ${elapsedFormatted}, Expected: ${expectedFormatted}, Remaining nodes: $remaining/$total_count"
+
     done
 }
 
