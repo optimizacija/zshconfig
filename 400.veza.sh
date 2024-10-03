@@ -113,7 +113,7 @@ function bazgennl {
 }
 
 
-# DOCKER & KUBERNETS (clean/upgrade)
+# DOCKER & KUBERNETS & colima (clean/upgrade)
 
 function bazcleandocker() {
     # bazel clean docker
@@ -142,6 +142,11 @@ function dockerwipe {
     docker stop $(docker ps -aq)
     docker rm $(docker ps -aq)
     docker network prune -f
+}
+
+function dockerunhang {
+    bazel run //tools:colima stop -- -f
+    bazel run //tools:colima start
 }
 
 
