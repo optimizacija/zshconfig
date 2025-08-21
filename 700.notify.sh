@@ -1,4 +1,4 @@
 function notify() {
     osascript -e 'display notification "Script Finished"'
-    say "Finito!"
+    afplay /Users/Jan/Documents/leviosa.mp3 
 }
