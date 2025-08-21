@@ -42,7 +42,7 @@ def _removeEmpties:
 def _findKeysWithValues($values):
     [
         . as $original
-        | leaf_paths as $p 
+        | paths(scalars) as $p 
         | $p | join(".") as $joinedPath 
         | $original | ({(getpath($p)|tostring): $joinedPath})
         | select(. | keys[0] as $key | any($values[]; . == $key))
